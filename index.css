@@ -1,0 +1,9 @@
+body {
+  margin: 0;
+  font-family: "Roboto";
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
