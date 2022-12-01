@@ -2,12 +2,11 @@ import axios from "axios";
 
 export const API = axios.create({ baseURL: "http://localhost:3001" });
 
-export const setRequestHeader = (token) => {
-  API.interceptors.request.use((req) => {
-    if (token) req.headers.authorization = `Bearer ${token}`;
-    return req;
-  });
-};
+API.interceptors.request.use(async (req) => {
+  const { token } = await window.electronAPI.getUser();
+  req.headers.authorization = `Bearer ${token}`;
+  return req;
+});
 
 export const signIn = (formData) => API.post("/user/signIn", formData);
 export const signUp = (formData) => API.post("/user/signUp", formData);

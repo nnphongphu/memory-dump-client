@@ -3,12 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <title>Image</title>
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="script-src 'self' 'unsafe-inline';"
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto"
+      rel="stylesheet"
     />
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+      #root {
+        position: relative;
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+      }
+      #button {
+        width: 150px;
+        height: 40px;
+        background-color: #1677ff;
+        color: white;
+        font-family: "Roboto";
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        justify-content: center;
+        position: absolute;
+        outline: none;
+        border: none;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+      }
+      #button:hover {
+        background-color: #4088ff;
+      }
+      img {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <img />
+      <button id="button">Export</button>
+    </div>
+    <script src="https://unpkg.com/merge-images@2.0.0/dist/index.umd.js"></script>
+    <script src="./side.js"></script>
   </body>
 </html>

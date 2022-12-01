@@ -1,7 +1,12 @@
 import * as api from "../api";
 import toast from "react-hot-toast";
 import React from "react";
-import { removeImage, setImages, setFavourite } from "../reducer/image.reducer";
+import {
+  removeImage,
+  setImages,
+  setFavourite,
+  setSelectedImage,
+} from "../reducer/image.reducer";
 
 export const fetchImagesAction = () => async (dispatch) => {
   toast.promise(
@@ -54,4 +59,8 @@ export const setFavouriteAction = (id, value) => async (dispatch) => {
         error && error?.message ? <b>{error.message}</b> : <b>Set failed.</b>,
     }
   );
+};
+
+export const setSelectedImageAction = (id, value) => async (dispatch) => {
+  dispatch(setSelectedImage({ id, value }));
 };

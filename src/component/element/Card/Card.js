@@ -5,13 +5,27 @@ import { useDispatch } from "react-redux";
 import {
   deleteImageAction,
   setFavouriteAction,
+  setSelectedImageAction,
 } from "../../../action/image.action";
+import toast from "react-hot-toast";
 
-export default function Card({ image }) {
+export default function Card({ image, selectedCount }) {
   const dispatch = useDispatch();
   return (
     <Container>
-      <Image url={image.url}>
+      <Image
+        url={image.url}
+        style={{
+          boxShadow: image.isSelected ? "inset 0px 0px 0px 2px blue" : "none",
+        }}
+        onClick={() => {
+          if (selectedCount == 6 && !image.isSelected) {
+            toast.error("You can only select maximum 6 images!");
+          } else {
+            dispatch(setSelectedImageAction(image.imageId, !image.isSelected));
+          }
+        }}
+      >
         <div
           style={{
             borderRadius: "0 0 5 5",
@@ -27,17 +41,26 @@ export default function Card({ image }) {
           {image.isFavourite ? (
             <HeartFilled
               style={{ color: "red", fontSize: 30 }}
-              onClick={() => dispatch(setFavouriteAction(image.imageId, false))}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(setFavouriteAction(image.imageId, false));
+              }}
             />
           ) : (
             <HeartOutlined
               style={{ color: "white", fontSize: 30 }}
-              onClick={() => dispatch(setFavouriteAction(image.imageId, true))}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(setFavouriteAction(image.imageId, true));
+              }}
             />
           )}
           <DeleteFilled
             style={{ color: "white", fontSize: 30 }}
-            onClick={() => dispatch(deleteImageAction(image.imageId))}
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(deleteImageAction(image.imageId));
+            }}
           />
         </div>
       </Image>

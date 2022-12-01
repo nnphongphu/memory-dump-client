@@ -1,4 +1,5 @@
 import { addUser, removeUser } from "../reducer/user.reducer";
+import { resetImageStore } from "../reducer/image.reducer";
 import * as api from "../api";
 import toast from "react-hot-toast";
 import React from "react";
@@ -7,9 +8,8 @@ export const signInAction = (formData) => async (dispatch) => {
   toast.promise(
     (async () => {
       const { data } = await api.signIn(formData);
-      dispatch(addUser(data));
       await window.electronAPI.setUser(data);
-      api.setRequestHeader(data.token);
+      dispatch(addUser(data));
     })(),
     {
       loading: "Login...",
@@ -28,9 +28,8 @@ export const signUpAction = (formData) => async (dispatch) => {
   toast.promise(
     (async () => {
       const { data } = await api.signUp(formData);
-      dispatch(addUser(data));
       await window.electronAPI.setUser(data);
-      api.setRequestHeader(data.token);
+      dispatch(addUser(data));
     })(),
     {
       loading: "Registering...",
@@ -48,8 +47,9 @@ export const signUpAction = (formData) => async (dispatch) => {
 export const signOutAction = () => async (dispatch) => {
   toast.promise(
     (async () => {
+      await window.electronAPI.setUser(null);
       dispatch(removeUser());
-      window.electronAPI.setUser(null);
+      dispatch(resetImageStore());
     })(),
     {
       loading: "Signing out...",

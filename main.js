@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const Store = require("electron-store");
 const path = require("path");
+const fs = require("fs");
 
 let store = new Store();
 
@@ -20,10 +21,15 @@ function createWindow() {
     height: 600,
     parent: win,
     frame: false,
+    show: false,
     resizable: false,
     fullscreenable: false,
+    backgroundColor: "#000000",
+    webPreferences: {
+      preload: path.join(__dirname, "side-preload.js"),
+    },
   });
-  child.setAlwaysOnTop(true);
+
   child.setPosition(win.getPosition()[0] + 800, win.getPosition()[1]);
 
   child.loadFile("side.html");
@@ -31,15 +37,32 @@ function createWindow() {
 
   win.on("move", function () {
     let position = win.getPosition();
-    child.setPosition(position[0] + 800, position[1]);
+    if (child) child.setPosition(position[0] + 800, position[1]);
   });
-}
 
-require("electron-reload")(__dirname, {
-  electron: path.join(__dirname, "node_modules", ".bin", "electron"),
-});
+  ipcMain.on("signIn", () => {
+    child.show();
+  });
 
-app.whenReady().then(() => {
+  ipcMain.on("signOut", () => {
+    child.hide();
+  });
+
+  ipcMain.on("change-selected-images", (event, arg) => {
+    child.webContents.send("change-selected-images", arg);
+  });
+
+  ipcMain.on("export", (event, arg) => {
+    const path = dialog.showSaveDialogSync({
+      filters: [{ name: "Images", extensions: ["jpg", "png"] }],
+    });
+    const base64ImageStripped = arg.split(";base64,").pop();
+    if (path)
+      fs.writeFile(path, base64ImageStripped, { encoding: "base64" }, () => {
+        win.webContents.send("finish-export");
+      });
+  });
+
   ipcMain.on("set-user", (event, arg) => {
     store.set("token", arg ? arg.token : null);
     store.set("email", arg ? arg.email : null);
@@ -48,7 +71,13 @@ app.whenReady().then(() => {
   ipcMain.handle("get-user", () => {
     return { token: store.get("token", null), email: store.get("email", null) };
   });
+}
 
+require("electron-reload")(__dirname, {
+  electron: path.join(__dirname, "node_modules", ".bin", "electron"),
+});
+
+app.whenReady().then(() => {
   createWindow();
 
   app.on("activate", () => {
