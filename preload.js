@@ -6,10 +6,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onFinishExport: (callback) => ipcRenderer.on("finish-export", callback),
   removeFinishExportListener: () =>
     ipcRenderer.removeAllListeners("finish-export"),
-  removeOpenUploadDialogListener: () =>
-    ipcRenderer.removeAllListeners("open-upload-dialog"),
   changeSelectedImages: (images) =>
     ipcRenderer.send("change-selected-images", images),
-  signIn: () => ipcRenderer.send("signIn"),
-  signOut: () => ipcRenderer.send("signOut"),
+  showSideBar: () => ipcRenderer.send("show-side-bar"),
+  hideSideBar: () => ipcRenderer.send("hide-side-bar"),
+  export: (b64) => ipcRenderer.send("export", b64),
+  onShowPreview: (callback) => ipcRenderer.on("show-preview", callback),
+  removeShowPreviewListensers: (callback) =>
+    ipcRenderer.removeAllListeners("show-preview"),
 });

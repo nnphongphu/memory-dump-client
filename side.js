@@ -30,3 +30,7 @@ window.electronAPI.onChangeSelectedImage((_event, images) => {
 document.querySelector("button").onclick = () => {
   if (exportB64) window.electronAPI.export(exportB64);
 };
+
+document.querySelector("span").onclick = () => {
+  window.electronAPI.showPreview();
+};

@@ -31,9 +31,12 @@ export default function Router() {
   }, [user]);
 
   useEffect(() => {
+    window.electronAPI.hideSideBar();
+  }, []);
+
+  useEffect(() => {
     if (!isLoading) {
-      if (user) window.electronAPI.signIn();
-      else window.electronAPI.signOut();
+      if (!user) window.electronAPI.hideSideBar();
     }
   }, [isLoading, user]);
 

@@ -35,17 +35,40 @@ function createWindow() {
   child.loadFile("side.html");
   win.loadFile("index.html");
 
-  win.on("move", function () {
-    let position = win.getPosition();
-    if (child) child.setPosition(position[0] + 800, position[1]);
+  // win.on("move", function () {
+  //   let position = win.getPosition();
+  //   if (child) child.setPosition(position[0] + 800, position[1]);
+  // });
+
+  child.on("move", () => {
+    let winPosition = win.getPosition();
+    let childPosititon = child.getPosition();
+    if (
+      childPosititon[0] >= winPosition[0] + 50 &&
+      childPosititon[0] + 400 <= winPosition[0] + 750 &&
+      childPosititon[1] >= winPosition[1] + 50 &&
+      childPosititon[1] <= winPosition[1] + 300
+    ) {
+      child.hide();
+      win.webContents.send("show-preview");
+    }
   });
 
-  ipcMain.on("signIn", () => {
-    child.show();
+  ipcMain.on("show-side-bar", () => {
+    if (child) {
+      let position = win.getPosition();
+      child.setPosition(position[0] + 800, position[1]);
+      child.show();
+    }
   });
 
-  ipcMain.on("signOut", () => {
-    child.hide();
+  ipcMain.on("hide-side-bar", () => {
+    if (child) child.hide();
+  });
+
+  ipcMain.on("show-preview", () => {
+    if (child) child.hide();
+    win.webContents.send("show-preview");
   });
 
   ipcMain.on("change-selected-images", (event, arg) => {

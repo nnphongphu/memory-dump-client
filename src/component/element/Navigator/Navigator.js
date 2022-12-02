@@ -25,7 +25,7 @@ export default function Navigator({ tab, setTab, handleUploadFile }) {
       <h4
         style={{
           color: "blue",
-          fontWeight: "normal",
+          fontWeight: "bold",
           cursor: "pointer",
         }}
         onClick={handleUploadFile}
@@ -82,7 +82,7 @@ export default function Navigator({ tab, setTab, handleUploadFile }) {
       <h4
         style={{
           color: "blue",
-          fontWeight: "normal",
+          fontWeight: "bold",
           cursor: "pointer",
         }}
         onClick={() => dispatch(signOutAction())}

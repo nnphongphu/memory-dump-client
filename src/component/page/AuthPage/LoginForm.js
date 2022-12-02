@@ -77,7 +77,7 @@ export default function LoginForm({ handleChangeTab }) {
           fontWeight: "normal",
           marginBottom: 20,
           marginTop: 20,
-          color: "blue",
+          color: "white",
           textDecorationLine: "underline",
           cursor: "pointer",
         }}

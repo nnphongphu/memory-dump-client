@@ -7,6 +7,7 @@ import { selectImage } from "../../../reducer/image.reducer";
 import { selectUser } from "../../../reducer/user.reducer";
 import Card from "../../element/Card/Card";
 import Navigator from "../../element/Navigator/Navigator";
+import Preview from "../../element/Preview/Preview";
 
 export default function HomePage() {
   const [tab, setTab] = useState("all");
@@ -14,6 +15,7 @@ export default function HomePage() {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const images = useSelector(selectImage);
+  const [showSideBar, setShowSideBar] = useState(true);
 
   const selectedCount = useMemo(() => {
     let count = 0;
@@ -57,14 +59,21 @@ export default function HomePage() {
     return window.electronAPI.removeFinishExportListener;
   }, []);
 
+  useEffect(() => {
+    window.electronAPI.onShowPreview((_event, value) => {
+      setShowSideBar(true);
+    });
+    return window.electronAPI.removeShowPreviewListensers;
+  }, []);
+
   return (
     <div
       style={{
         backgroundColor: "#000000",
         width: "100%",
-        overflowX: "hidden",
-        minHeight: "calc(100vh - 80px)",
-        paddingTop: 80,
+        minHeight: "100vh",
+        overflow: "hidden",
+        height: "calc(100vh - 80px)",
       }}
     >
       <input
@@ -74,62 +83,96 @@ export default function HomePage() {
         type="file"
         accept="image/*"
       ></input>
-      <Navigator
-        tab={tab}
-        setTab={setTab}
-        handleUploadFile={handleUploadFile}
-      />
-      <div
-        style={{
-          margin: 0,
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "0px 30px",
-          marginBottom: 30,
-        }}
-      >
-        <h4
+      <div style={{ width: "100%", overflowY: "hidden" }}>
+        <Navigator
+          tab={tab}
+          setTab={setTab}
+          handleUploadFile={handleUploadFile}
+        />
+        <div
           style={{
-            color: "white",
-            fontWeight: "normal",
-            margin: 0,
+            width: "100%",
+            display: "flex",
+            maxHeight: "100vh",
+            overflowY: "hidden",
+            height: "100vh",
           }}
         >
-          Welcome{" "}
-          <span style={{ textDecorationLine: "underline" }}>{user}</span>!
-        </h4>
-        <h4
-          style={{
-            color: "white",
-            fontWeight: "normal",
-            margin: 0,
-          }}
-        >
-          Selected {selectedCount} image{"(s)"}
-        </h4>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          padding: "0px 30px",
-          justifyContent: "flex-start",
-          columnGap: 40,
-          rowGap: 30,
-          marginBottom: 30,
-        }}
-      >
-        {images &&
-          images.map((image) => {
-            if (tab == "favourite" && image.isFavourite == false) return null;
-            return (
-              <Card
-                image={image}
-                key={image.url}
-                selectedCount={selectedCount}
-              />
-            );
-          })}
+          <div
+            style={{
+              width: "100%",
+              maxHeight: "100vh",
+              overflowY: "auto",
+            }}
+          >
+            <div
+              style={{
+                margin: 0,
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "0px 30px",
+                marginTop: 80,
+                marginBottom: 30,
+              }}
+            >
+              <h4
+                style={{
+                  color: "white",
+                  fontWeight: "normal",
+                  margin: 0,
+                }}
+              >
+                Welcome{" "}
+                <span style={{ textDecorationLine: "underline" }}>{user}</span>!
+              </h4>
+              <h4
+                style={{
+                  color: "white",
+                  fontWeight: "normal",
+                  margin: 0,
+                }}
+              >
+                Selected {selectedCount} image{"(s)"}
+              </h4>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                padding: showSideBar ? "0px 50px" : "0px 30px",
+                justifyContent: "flex-start",
+                columnGap: 40,
+                rowGap: 30,
+                marginBottom: 30,
+              }}
+            >
+              {images &&
+                images.map((image) => {
+                  if (tab == "favourite" && image.isFavourite == false)
+                    return null;
+                  return (
+                    <Card
+                      image={image}
+                      key={image.url}
+                      selectedCount={selectedCount}
+                    />
+                  );
+                })}
+            </div>
+          </div>
+          <Preview
+            style={{
+              display: showSideBar ? "flex" : "none",
+              width: "500px",
+              height: "calc(100% - 55px)",
+              alignSelf: "flex-end",
+              border: "solid 0px",
+              borderLeftWidth: "1px",
+              borderColor: "#303030",
+            }}
+            setShowSideBar={setShowSideBar}
+          />
+        </div>
       </div>
     </div>
   );

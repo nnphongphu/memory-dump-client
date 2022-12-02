@@ -77,7 +77,6 @@ export default function RegisterForm({ handleChangeTab }) {
           fontWeight: "normal",
           marginBottom: 20,
           marginTop: 20,
-          color: "blue",
           textDecorationLine: "underline",
           cursor: "pointer",
         }}
