@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import mergeImages from "merge-images";
-import { selectImage } from "../../../reducer/image.reducer";
-import { Button } from "antd";
-import { ExpandAltOutlined } from "@ant-design/icons";
-import styled from "styled-components";
+import { Container, StyledButton } from "./CustomStyles";
 
-export default function Preview({ setShowSideBar, style }) {
-  const images = useSelector(selectImage);
+export default function Preview({ style, button, images }) {
   const [previewB64, setPreviewB64] = useState(null);
 
   useEffect(() => {
@@ -35,41 +30,17 @@ export default function Preview({ setShowSideBar, style }) {
   }, [images]);
 
   return (
-    <div style={{ ...style, position: "relative" }}>
+    <Container style={{ ...style, position: "relative" }}>
       <img src={previewB64} />
-      <Button
+      <StyledButton
         type="primary"
-        style={{
-          position: "absolute",
-          bottom: 30,
-          left: "50%",
-          borderRadius: 30,
-          padding: "0px 20px",
-          transform: "translateX(-50%)",
-        }}
         onClick={() => {
           if (previewB64) window.electronAPI.export(previewB64);
         }}
       >
         Export
-      </Button>
-      <IconButton
-        onClick={(event) => {
-          setShowSideBar(false);
-          window.electronAPI.showSideBar();
-        }}
-      />
-    </div>
+      </StyledButton>
+      {button}
+    </Container>
   );
 }
-
-const IconButton = styled(ExpandAltOutlined)`
-  position: absolute;
-  top: 20px;
-  right: 10px;
-  color: #ffffff;
-  font-size: 30px;
-  &:hover {
-    color: #1677ff;
-  }
-`;

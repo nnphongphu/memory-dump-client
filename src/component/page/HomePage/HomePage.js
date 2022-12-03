@@ -1,16 +1,28 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchImagesAction } from "../../../action/image.action";
+import {
+  fetchImagesAction,
+  setSelectedImageAction,
+  deleteImageAction,
+  setFavouriteAction,
+} from "../../../action/image.action";
 import * as api from "../../../api";
 import { selectImage } from "../../../reducer/image.reducer";
 import { selectUser } from "../../../reducer/user.reducer";
-import Card from "../../element/Card/Card";
-import Navigator from "../../element/Navigator/Navigator";
-import Preview from "../../element/Preview/Preview";
+import Card from "../../element/Card";
+import Navigator from "../../layout/Navigator";
+import Preview from "../../element/Preview";
+import {
+  CardContainer,
+  Container,
+  ContentContainer,
+  IconButton,
+  Text,
+} from "./CustomStyles";
 
 export default function HomePage() {
-  const [tab, setTab] = useState("all");
+  const [tab, setTab] = useState(null);
   const buttonRef = useRef(null);
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
@@ -32,9 +44,13 @@ export default function HomePage() {
     dispatch(fetchImagesAction());
   };
 
-  useEffect(() => {
-    dispatch(fetchImagesAction());
-  }, [user]);
+  const handleCardClick = (image) => {
+    if (selectedCount == 6 && !image.isSelected) {
+      toast.error("You can only select maximum 6 images!");
+    } else {
+      dispatch(setSelectedImageAction(image.imageId, !image.isSelected));
+    }
+  };
 
   const handleUploadFile = () => {
     if (buttonRef) {
@@ -43,137 +59,125 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    let selectedImages = [];
-    images.forEach((image) => {
-      if (image.isSelected) {
-        selectedImages.push(image);
-      }
-    });
-    window.electronAPI.changeSelectedImages(selectedImages);
-  }, [images]);
+    dispatch(fetchImagesAction());
+  }, [user]);
 
   useEffect(() => {
-    window.electronAPI.onFinishExport((_event, value) => {
-      toast.success("Finished export file!");
-    });
-    return window.electronAPI.removeFinishExportListener;
-  }, []);
+    window.electronAPI.changeSelectedImages(images);
+  }, [images]);
 
   useEffect(() => {
     window.electronAPI.onShowPreview((_event, value) => {
       setShowSideBar(true);
     });
-    return window.electronAPI.removeShowPreviewListensers;
+    window.electronAPI.onFinishExport((_event, value) => {
+      toast.success("Finished export file!");
+    });
+    return () => {
+      window.electronAPI.removeShowPreviewListensers();
+      window.electronAPI.removeFinishExportListener();
+    };
   }, []);
 
   return (
-    <div
-      style={{
-        backgroundColor: "#000000",
-        width: "100%",
-        minHeight: "100vh",
-        overflow: "hidden",
-        height: "calc(100vh - 80px)",
-      }}
-    >
+    <>
+      <Container>
+        <div style={{ width: "100%", overflowY: "hidden" }}>
+          <Navigator
+            tab={tab}
+            setTab={setTab}
+            handleUploadFile={handleUploadFile}
+          />
+          <ContentContainer>
+            <div
+              style={{
+                width: "100%",
+                maxHeight: "100vh",
+                overflowY: "auto",
+              }}
+            >
+              <div
+                style={{
+                  margin: 0,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "0px 30px",
+                  marginTop: 80,
+                  marginBottom: 30,
+                }}
+              >
+                <Text>
+                  Welcome{" "}
+                  <span style={{ textDecorationLine: "underline" }}>
+                    {user}
+                  </span>
+                  !
+                </Text>
+                <Text>
+                  Selected {selectedCount} image{"(s)"}
+                </Text>
+              </div>
+              <CardContainer showSideBar={showSideBar}>
+                {images &&
+                  images.map((image) => {
+                    if (tab == "favourite" && image.isFavourite == false)
+                      return null;
+                    return (
+                      <Card
+                        image={image}
+                        key={image.url}
+                        selectedCount={selectedCount}
+                        handleClick={() => handleCardClick(image)}
+                      >
+                        <Card.HeartButton
+                          isFilled={image.isFavourite}
+                          handleFilledClick={() =>
+                            dispatch(setFavouriteAction(image.imageId, false))
+                          }
+                          handleOutlineClick={() =>
+                            dispatch(setFavouriteAction(image.imageId, true))
+                          }
+                        />
+                        <Card.DeleteButton
+                          handleClick={() =>
+                            dispatch(deleteImageAction(image.imageId))
+                          }
+                        />
+                      </Card>
+                    );
+                  })}
+              </CardContainer>
+            </div>
+            <Preview
+              style={{
+                display: showSideBar ? "flex" : "none",
+                width: "500px",
+                height: "calc(100% - 55px)",
+                alignSelf: "flex-end",
+                border: "solid 0px",
+                borderLeftWidth: "1px",
+                borderColor: "#303030",
+              }}
+              images={images}
+              button={
+                <IconButton
+                  onClick={(event) => {
+                    setShowSideBar(false);
+                    window.electronAPI.showSideBar();
+                  }}
+                />
+              }
+            />
+          </ContentContainer>
+        </div>
+      </Container>
       <input
         ref={buttonRef}
         style={{ display: "none" }}
         onChange={fileSelected}
         type="file"
         accept="image/*"
-      ></input>
-      <div style={{ width: "100%", overflowY: "hidden" }}>
-        <Navigator
-          tab={tab}
-          setTab={setTab}
-          handleUploadFile={handleUploadFile}
-        />
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            maxHeight: "100vh",
-            overflowY: "hidden",
-            height: "100vh",
-          }}
-        >
-          <div
-            style={{
-              width: "100%",
-              maxHeight: "100vh",
-              overflowY: "auto",
-            }}
-          >
-            <div
-              style={{
-                margin: 0,
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "0px 30px",
-                marginTop: 80,
-                marginBottom: 30,
-              }}
-            >
-              <h4
-                style={{
-                  color: "white",
-                  fontWeight: "normal",
-                  margin: 0,
-                }}
-              >
-                Welcome{" "}
-                <span style={{ textDecorationLine: "underline" }}>{user}</span>!
-              </h4>
-              <h4
-                style={{
-                  color: "white",
-                  fontWeight: "normal",
-                  margin: 0,
-                }}
-              >
-                Selected {selectedCount} image{"(s)"}
-              </h4>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                padding: showSideBar ? "0px 50px" : "0px 30px",
-                justifyContent: "flex-start",
-                columnGap: 40,
-                rowGap: 30,
-                marginBottom: 30,
-              }}
-            >
-              {images &&
-                images.map((image) => {
-                  if (tab == "favourite" && image.isFavourite == false)
-                    return null;
-                  return (
-                    <Card
-                      image={image}
-                      key={image.url}
-                      selectedCount={selectedCount}
-                    />
-                  );
-                })}
-            </div>
-          </div>
-          <Preview
-            style={{
-              display: showSideBar ? "flex" : "none",
-              width: "500px",
-              height: "calc(100% - 55px)",
-              alignSelf: "flex-end",
-              border: "solid 0px",
-              borderLeftWidth: "1px",
-              borderColor: "#303030",
-            }}
-            setShowSideBar={setShowSideBar}
-          />
-        </div>
-      </div>
-    </div>
+      />
+    </>
   );
 }

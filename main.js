@@ -1,11 +1,12 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const isDev = require("electron-is-dev");
 const Store = require("electron-store");
 const path = require("path");
 const fs = require("fs");
 
 let store = new Store();
 
-function createWindow() {
+const createWindow = () => {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -26,19 +27,14 @@ function createWindow() {
     fullscreenable: false,
     backgroundColor: "#000000",
     webPreferences: {
-      preload: path.join(__dirname, "side-preload.js"),
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
   child.setPosition(win.getPosition()[0] + 800, win.getPosition()[1]);
 
-  child.loadFile("side.html");
-  win.loadFile("index.html");
-
-  // win.on("move", function () {
-  //   let position = win.getPosition();
-  //   if (child) child.setPosition(position[0] + 800, position[1]);
-  // });
+  child.loadURL(`file://${__dirname}/index.html#/preview`);
+  win.loadURL(`file://${__dirname}/index.html`);
 
   child.on("move", () => {
     let winPosition = win.getPosition();
@@ -63,10 +59,6 @@ function createWindow() {
   });
 
   ipcMain.on("hide-side-bar", () => {
-    if (child) child.hide();
-  });
-
-  ipcMain.on("show-preview", () => {
     if (child) child.hide();
     win.webContents.send("show-preview");
   });
@@ -94,7 +86,7 @@ function createWindow() {
   ipcMain.handle("get-user", () => {
     return { token: store.get("token", null), email: store.get("email", null) };
   });
-}
+};
 
 require("electron-reload")(__dirname, {
   electron: path.join(__dirname, "node_modules", ".bin", "electron"),
