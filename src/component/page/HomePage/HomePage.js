@@ -6,6 +6,7 @@ import {
   setSelectedImageAction,
   deleteImageAction,
   setFavouriteAction,
+  uploadFileAction,
 } from "../../../action/image.action";
 import * as api from "../../../api";
 import { selectImage } from "../../../reducer/image.reducer";
@@ -37,18 +38,21 @@ export default function HomePage() {
 
   const fileSelected = async (event) => {
     const file = event.target.files[0];
-    const formData = new FormData();
-    formData.append("image", file);
-    formData.append("caption", file.name);
-    await api.uploadImage(formData);
-    dispatch(fetchImagesAction());
+    dispatch(uploadFileAction(file));
   };
 
   const handleCardClick = (image) => {
     if (selectedCount == 6 && !image.isSelected) {
       toast.error("You can only select maximum 6 images!");
     } else {
-      dispatch(setSelectedImageAction(image.imageId, !image.isSelected));
+      const newImageState = images.map((newImage) =>
+        image.imageId == newImage.imageId
+          ? { ...newImage, isSelected: !image.isSelected }
+          : newImage
+      );
+      dispatch(
+        setSelectedImageAction(image.imageId, !image.isSelected, newImageState)
+      );
     }
   };
 
@@ -65,10 +69,6 @@ export default function HomePage() {
   useEffect(() => {
     dispatch(fetchImagesAction());
   }, [user]);
-
-  useEffect(() => {
-    window.electronAPI.changeSelectedImages(images);
-  }, [images]);
 
   useEffect(() => {
     window.electronAPI.onShowPreview((_event, value) => {

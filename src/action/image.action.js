@@ -61,6 +61,30 @@ export const setFavouriteAction = (id, value) => async (dispatch) => {
   );
 };
 
-export const setSelectedImageAction = (id, value) => async (dispatch) => {
-  dispatch(setSelectedImage({ id, value }));
+export const setSelectedImageAction =
+  (id, value, images) => async (dispatch) => {
+    dispatch(setSelectedImage({ id, value }));
+    window.electronAPI.changeSelectedImages(images);
+  };
+
+export const uploadFileAction = (file) => async (dispatch) => {
+  toast.promise(
+    (async () => {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("caption", file.name);
+      await api.uploadImage(formData);
+      dispatch(fetchImagesAction());
+    })(),
+    {
+      loading: "Uploading file...",
+      success: <b>Uploaded successfully!</b>,
+      error: (error) =>
+        error && error?.message ? (
+          <b>{error.message}</b>
+        ) : (
+          <b>Upload failed.</b>
+        ),
+    }
+  );
 };
