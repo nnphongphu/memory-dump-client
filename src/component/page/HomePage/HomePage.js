@@ -58,6 +58,10 @@ export default function HomePage() {
     }
   };
 
+  const handleDownload = (url) => {
+    window.electronAPI.downloadImage(url);
+  };
+
   useEffect(() => {
     dispatch(fetchImagesAction());
   }, [user]);
@@ -73,9 +77,13 @@ export default function HomePage() {
     window.electronAPI.onFinishExport((_event, value) => {
       toast.success("Finished export file!");
     });
+    window.electronAPI.onFinishDownload((_event, value) => {
+      toast.success("Finished download!");
+    });
     return () => {
       window.electronAPI.removeShowPreviewListensers();
       window.electronAPI.removeFinishExportListener();
+      window.electronAPI.removeFinishDownloadListeners();
     };
   }, []);
 
@@ -128,6 +136,7 @@ export default function HomePage() {
                         key={image.url}
                         selectedCount={selectedCount}
                         handleClick={() => handleCardClick(image)}
+                        handleDownload={() => handleDownload(image.url)}
                       >
                         <Card.HeartButton
                           isFilled={image.isFavourite}

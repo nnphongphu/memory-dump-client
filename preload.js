@@ -20,4 +20,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onChangeSelectedImage: (callback) =>
     ipcRenderer.on("change-selected-images", callback),
   export: (b64) => ipcRenderer.send("export", b64),
+  downloadImage: (url) => ipcRenderer.send("download-image", url),
+  onFinishDownload: (callback) => ipcRenderer.on("finish-download", callback),
+  removeFinishDownloadListeners: () =>
+    ipcRenderer.removeAllListeners("finish-download"),
 });

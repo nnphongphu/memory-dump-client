@@ -1,8 +1,14 @@
 import React from "react";
 import { HeartOutlined, HeartFilled, DeleteFilled } from "@ant-design/icons";
-import { Image, Container, Caption, ButtonContainer } from "./CustomStyles";
+import {
+  Image,
+  Container,
+  Caption,
+  ButtonContainer,
+  DownloadButton,
+} from "./CustomStyles";
 
-export default function Card({ image, handleClick, children }) {
+export default function Card({ image, handleClick, children, handleDownload }) {
   return (
     <Container>
       <Image
@@ -10,6 +16,12 @@ export default function Card({ image, handleClick, children }) {
         isSelected={image.isSelected}
         onClick={handleClick}
       >
+        <DownloadButton
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDownload();
+          }}
+        />
         {children ? <ButtonContainer>{children}</ButtonContainer> : null}
       </Image>
       <Caption>{image.caption}</Caption>

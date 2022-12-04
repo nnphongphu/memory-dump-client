@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const isDev = require("electron-is-dev");
 const Store = require("electron-store");
 const path = require("path");
+var https = require("https");
 const fs = require("fs");
 
 let store = new Store();
@@ -76,6 +77,19 @@ const createWindow = () => {
       fs.writeFile(path, base64ImageStripped, { encoding: "base64" }, () => {
         win.webContents.send("finish-export");
       });
+  });
+
+  ipcMain.on("download-image", async (event, arg) => {
+    const path = dialog.showSaveDialogSync({
+      filters: [{ name: "Images", extensions: ["jpg", "png"] }],
+    });
+    if (path) {
+      var file = fs.createWriteStream(path);
+      https.get(arg, function (response) {
+        response.pipe(file);
+      });
+      win.webContents.send("finish-download");
+    }
   });
 
   ipcMain.on("set-user", (event, arg) => {
